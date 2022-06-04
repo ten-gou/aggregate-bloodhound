@@ -102,7 +102,6 @@ function populateChart() {
 }
 
 function saveRecord(record) {
-  console.log(record)
   alert("You are currently offline! This expense/deposit is added to the cache, and will update the site after you return online")
 
   const expenseDeposit = db.transaction(['new_budget'], 'readwrite');
