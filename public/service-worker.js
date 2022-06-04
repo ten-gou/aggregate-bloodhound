@@ -1,5 +1,5 @@
-const CACHE_NAME = 'budget-cache';
-const DATA_CACHE_NAME = 'budget-data-cache';
+const CACHE_NAME = 'budget-cache-v1';
+const DATA_CACHE_NAME = 'budget-data-cache-v2';
 
 // Caches the files within the Public Folder
 const FILES_TO_CACHE = [

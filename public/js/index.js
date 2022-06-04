@@ -78,6 +78,11 @@ function populateChart() {
   });
 }
 
+function saveRecord(transaction) {
+  console.log(transaction)
+  alert("You are currently offline! This expense/deposit is added to the cache, and will update the site after you return online")
+}
+
 function sendTransaction(isAdding) {
   let nameEl = document.querySelector("#t-name");
   let amountEl = document.querySelector("#t-amount");
