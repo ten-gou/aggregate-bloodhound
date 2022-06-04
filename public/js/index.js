@@ -24,18 +24,7 @@ request.onerror = function(event) {
   console.log(event.target.errorCode);
 };
 
-fetch("/api/transaction")
-  .then(response => {
-    return response.json();
-  })
-  .then(data => {
-    // save db data on global variable
-    transactions = data;
 
-    populateTotal();
-    populateTable();
-    populateChart();
-  });
 
 function populateTotal() {
   // reduce transaction amounts to a single total value
@@ -100,6 +89,19 @@ function populateChart() {
     }
   });
 }
+
+fetch("/api/transaction")
+  .then(response => {
+    return response.json();
+  })
+  .then(data => {
+    // save db data on global variable
+    transactions = data;
+
+    populateTotal();
+    populateTable();
+    populateChart();
+  });
 
 function saveRecord(record) {
   alert("You are currently offline! This expense/deposit is added to the cache, and will update the site after you return online")
