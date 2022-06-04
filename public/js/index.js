@@ -4,12 +4,14 @@ let indexDb;
 const request = indexedDB.open('budget-tracker', 1);
 
 
+// Request Functions
+
   // this event will emit if the database version changes (nonexistant to version 1, v1 to v2, etc.)
-  request.onupgradeneeded = function(event) {
-    const db = event.target.result;
+request.onupgradeneeded = function(event) {
+  const db = event.target.result;
   
-    db.createObjectStore('new_budget', { autoIncrement: true });
-  };
+  db.createObjectStore('new_budget', { autoIncrement: true });
+};
 
   // upon a success
 request.onsuccess = function(event) {
@@ -20,11 +22,23 @@ request.onsuccess = function(event) {
   }
 };
 
+  // upon an error
 request.onerror = function(event) {
   console.log(event.target.errorCode);
 };
 
+fetch("/api/transaction")
+  .then(response => {
+    return response.json();
+  })
+  .then(data => {
+    // save db data on global variable
+    transactions = data;
 
+    populateTotal();
+    populateTable();
+    populateChart();
+  });
 
 function populateTotal() {
   // reduce transaction amounts to a single total value
@@ -89,19 +103,6 @@ function populateChart() {
     }
   });
 }
-
-fetch("/api/transaction")
-  .then(response => {
-    return response.json();
-  })
-  .then(data => {
-    // save db data on global variable
-    transactions = data;
-
-    populateTotal();
-    populateTable();
-    populateChart();
-  });
 
 function saveRecord(record) {
   alert("You are currently offline! This expense/deposit is added to the cache, and will update the site after you return online")
