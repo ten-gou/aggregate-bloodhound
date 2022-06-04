@@ -1,5 +1,28 @@
 let transactions = [];
 let myChart;
+let indexDb;
+const request = indexedDB.open('budget-tracker', 1);
+
+
+  // this event will emit if the database version changes (nonexistant to version 1, v1 to v2, etc.)
+  request.onupgradeneeded = function(event) {
+    const db = event.target.result;
+  
+    db.createObjectStore('new_budget', { autoIncrement: true });
+  };
+
+  // upon a success
+request.onsuccess = function(event) {
+  db = event.target.result;
+
+  if (navigator.onLine) {
+    updateRecord();
+  }
+};
+
+request.onerror = function(event) {
+  console.log(event.target.errorCode);
+};
 
 fetch("/api/transaction")
   .then(response => {
@@ -78,9 +101,53 @@ function populateChart() {
   });
 }
 
-function saveRecord(transaction) {
-  console.log(transaction)
+function saveRecord(record) {
+  console.log(record)
   alert("You are currently offline! This expense/deposit is added to the cache, and will update the site after you return online")
+
+  const expenseDeposit = db.transaction(['new_budget'], 'readwrite');
+
+  const budgetObjectStore = expenseDeposit.objectStore('new_budget');
+
+  budgetObjectStore.add(record);
+}
+
+function updateRecord() {
+  const expenseDeposit = db.transaction(['new_budget'], 'readwrite');
+
+  const budgetObjectStore = expenseDeposit.objectStore('new_budget');
+
+  const getAll = budgetObjectStore.getAll();
+
+  getAll.onsuccess = function() {
+    if (getAll.result.length > 0) {
+      fetch("/api/transaction", {
+        method: 'POST',
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(serverResponse => {
+        if (serverResponse.message) {
+          throw new Error(serverResponse);
+        }
+
+        const expenseDeposit = db.transaction(['new_budget'], 'readwrite');
+
+        const budgetObjectStore = expenseDeposit.objectStore('new_budget');
+
+        budgetObjectStore.clear();
+
+        console.log("The saved data has been submitted!")
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    } 
+  }
 }
 
 function sendTransaction(isAdding) {
@@ -156,3 +223,6 @@ document.querySelector("#add-btn").onclick = function() {
 document.querySelector("#sub-btn").onclick = function() {
   sendTransaction(false);
 };
+
+
+window.addEventListener('online', updateRecord);
